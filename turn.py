@@ -1,0 +1,10 @@
+is_white_move = True
+en_passant = None
+en_passant_notation = None
+last_moves = ['rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1']
+checkmate = 0
+total_moves = 1
+halfmoves = 0
+take = False
+win_by_time = ""
+game_over = False
