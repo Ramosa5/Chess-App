@@ -162,7 +162,7 @@ class ChessGame(QMainWindow):
         self.setWindowTitle("Gra w szachy")
         self.setGeometry(100, 100, 800, 600)
 
-        self.chessboard = Chessboard("Default")
+        self.chessboard = Chessboard("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
         self.view = QGraphicsView(self.chessboard, self)
         self.setCentralWidget(self.view)
 
