@@ -3,7 +3,8 @@ from PyQt5.QtGui import QPixmap, QColor
 from PyQt5.QtCore import QRectF, QPointF, pyqtSignal, QThread, QTimer
 from PyQt5.QtCore import QObject, pyqtSignal
 import turn
-
+import sqllite3_database
+import xml_move_history
 
 class DraggablePiece(QGraphicsPixmapItem):
     def __init__(self, image_path, parent=None):
@@ -37,28 +38,6 @@ class DraggablePiece(QGraphicsPixmapItem):
 
         self.make_a_move(x, y)
 
-    def setup_board_from_fen(self, fen):
-        piece_map = {
-            'P': ('Pawn', 'white'), 'R': ('Rook', 'white'), 'N': ('Knight', 'white'),
-            'B': ('Bishop', 'white'), 'Q': ('Queen', 'white'), 'K': ('King', 'white'),
-            'p': ('Pawn', 'black'), 'r': ('Rook', 'black'), 'n': ('Knight', 'black'),
-            'b': ('Bishop', 'black'), 'q': ('Queen', 'black'), 'k': ('King', 'black')
-        }
-
-        # Clear the board or move all pieces to an 'off-board' position
-        self.clear_board()
-
-        ranks = fen.split(' ')[0].split('/')
-
-        for y, rank in enumerate(ranks):
-            x = 0
-            for char in rank:
-                if char.isdigit():
-                    x += int(char)  # Skip empty squares
-                else:
-                    piece_type, color = piece_map[char]
-                    self.move_piece_to(piece_type, color, x, 7 - y)
-                    x += 1
 
     def move_piece_to(self, piece_type, color, x, y):
         # Find a piece of the specified type and color that's not already placed
@@ -68,9 +47,6 @@ class DraggablePiece(QGraphicsPixmapItem):
                 return
 
     def position_to_tile(self, position):
-        """
-        Converts a QPointF position to a chessboard tile notation (e.g., 'e4').
-        """
         file_number = int(position.x() // 60)  # Convert x position to file number (0-7)
         rank_number = 8 - int(position.y() // 60)  # Convert y position to rank number (1-8), inverted because y starts from the top
 
@@ -216,9 +192,14 @@ class DraggablePiece(QGraphicsPixmapItem):
                 turn.is_white_move = not turn.is_white_move
                 if turn.is_white_move:
                     turn.total_moves+=1
-                turn.last_moves.append(self.export_to_fen())
-                print(self.export_to_fen())
-                print(self.position_to_tile(self.pos()))
+                fen_string = self.export_to_fen()
+                turn.last_moves.append(fen_string)
+                fen_db = sqllite3_database.FenDatabase('fen_database.db')
+                fen_db.insert_fen_string(fen_string)
+                fen_xml_db = xml_move_history.FenXMLDatabase()
+                fen_xml_db.add_fen_notation(fen_string)
+                # print(fen_string)
+                # print(self.position_to_tile(self.pos()))
 
             else:
                 self.setPos(self.original_position)
@@ -648,3 +629,4 @@ class King(DraggablePiece):
                 if item.is_move_allowed(item.pos(), position):
                     return True
         return False
+

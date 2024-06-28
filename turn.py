@@ -8,3 +8,4 @@ halfmoves = 0
 take = False
 win_by_time = ""
 game_over = False
+ai_player = False
